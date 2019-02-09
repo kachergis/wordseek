@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>My experiment</title>
+        <script src="js/jspsych.js"></script>
+        <script src="js/jspsych-html-button-response.js"></script>
+        <link href="css/jspsych.css" rel="stylesheet" type="text/css"></link>
+    </head>
+    <body></body>
+    <script>
+
+     /* create timeline */
+     var myTimeline = [];
+
+     /* define welcome message trial */
+     var trial = {
+       type: 'html-button-response',
+       stimulus: '<p>Running</p>',
+       choices : ['healthy', 'unhealthy'],
+       prompt: '<p>Is this activity healthy or unhealthy?</p>',
+
+       post_trial_gap : 2000
+
+     }
+
+     var finish_slide = {
+       type: 'html-button-response',
+       stimulus: "<div class='slide' id='finished'>" +
+               "<p>You're finished - thanks for participating</p>" +
+              "<p>" +
+              "In this experiment we wanted to find out how people integrate different" +
+              "types of information they have about a speaker.</p>" +
+              "<p>Submitting to Mechanical Turk...</p>	</div>",
+       choices : ["OK"]
+     }
+
+     myTimeline.push(trial);
+     myTimeline.push(finish_slide)
+
+    jsPsych.init({
+        timeline: myTimeline
+    })
+
+    </script>
+</html>
