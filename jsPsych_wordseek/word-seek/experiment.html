@@ -4,6 +4,10 @@
         <title>My experiment</title>
         <script src="js/jspsych.js"></script>
         <script src="js/jspsych-html-button-response.js"></script>
+        <!-- <script src="js/jspsych-animation.js"></script> -->
+        <script src="js/jspsych-audio-button-response.js"></script>
+        <!--  will build complex-animation plugin that plays audio and shows whole scene -->
+        <script src="js/jspsych-animation.js"></script>
         <link href="css/jspsych.css" rel="stylesheet" type="text/css"></link>
     </head>
     <body></body>
@@ -13,15 +17,23 @@
      var myTimeline = [];
 
      /* define welcome message trial */
-     var trial = {
+     var test_trial = {
        type: 'html-button-response',
-       stimulus: '<p>Running</p>',
-       choices : ['healthy', 'unhealthy'],
-       prompt: '<p>Is this activity healthy or unhealthy?</p>',
-
+       stimulus: '<p>Choice</p>',
+       choices : ['Left', 'Right'], // make these images?
+       prompt: '<p>Which bag do you want to open?</p>',
        post_trial_gap : 2000
-
      }
+
+     var animation_sequence = ["images/Bear_straight.png", "images/Bear_point_l.png", "images/Bear_point_r.png", "images/Bear_straight.png", "images/Bear_disappear.png"];
+
+    var bear_trial = {
+        type: 'animation',
+        stimuli: animation_sequence,
+        sequence_reps: 1,
+        frame_time: 2000, // choices: ['Q','P']
+        prompt: '<img src="images/table.png"> <img src="images/bag3.jpg">'
+    };
 
      var finish_slide = {
        type: 'html-button-response',
@@ -34,7 +46,7 @@
        choices : ["OK"]
      }
 
-     myTimeline.push(trial);
+     myTimeline.push(bear_trial, test_trial);
      myTimeline.push(finish_slide)
 
     jsPsych.init({
