@@ -6,6 +6,7 @@
         <script src="js/jspsych-html-button-response.js"></script>
         <!-- <script src="js/jspsych-animation.js"></script> -->
         <script src="js/jspsych-audio-button-response.js"></script>
+        <script src="js/jspsych-instructions.js"></script>
         <!--  will build complex-animation plugin that plays audio and shows whole scene -->
         <script src="js/jspsych-animation.js"></script>
         <link href="css/jspsych.css" rel="stylesheet" type="text/css"></link>
@@ -15,6 +16,14 @@
 
      /* create timeline */
      var myTimeline = [];
+
+     var instructions = {
+        type: 'instructions',
+        pages: ["<p>Instructions from Manuel's experiment!</p>", "page2 ..."],
+        show_clickable_nav: true,
+        show_page_number: true,
+        post_trial_gap: 2000
+     }
 
      /* define welcome message trial */
      var test_trial = {
@@ -46,6 +55,8 @@
        choices : ["OK"]
      }
 
+     // myTimeline.push(consent);
+     myTimeline.push(instructions);
      myTimeline.push(bear_trial, test_trial);
      myTimeline.push(finish_slide)
 
