@@ -19,7 +19,28 @@
 
      var instructions = {
         type: 'instructions',
-        pages: ["<p>Instructions from Manuel's experiment!</p>", "page2 ..."],
+        pages: ["<div style='width:500px; text-align:left' id='instructions'>"+
+                "<div style='width: 500px; margin: 0 auto; text-align: center; background-color: #8C1516; padding: 20px 15px 10px 10px'>"+
+                "<img src='images/stanford.png' height='46' width='360' alt='Stanford University'>"+
+                "</div>"+
+                "<div style='width: 500px;text-align: center'>"+
+                "<p> <strong>Stanford Language and Cognition Lab</strong></p></div>"+
+                "<p>In this experiment, you will learn words for new toys. Your task is to"+
+                "figure out which word goes with which toy. The materials were"+
+                "designed for children. Even if they seem strange at times, we ask you"+
+                "to try to be as accurate as possible. You will hear sound, so please"+
+                "make sure your volume is turned on. The experiment takes about 7-9 minutes."+
+                "<p class='block-text' id='legal'>Legal information: By answering the following questions, you are participating in a study being performed by cognitive scientists in the Stanford Department of Psychology. If you have questions about this research, please contact George Kachergis at <a href='mailto://gkacherg@stanford.edu'>gkacherg@stanford.edu</a>. You must be at least 18 years old to participate. Your participation in this research is voluntary. You may decline to answer any or all of the following questions. You may decline further participation, at any time, without adverse consequences. Your anonymity is assured; the researchers who have requested your participation will not receive any personal information about you.</p>"+
+            	  "</div>",
+        "<div><div align='center' width='500px'> <p><strong>Instructions</strong></p><table style='width:100%'>"+
+        "<tbody><p>These animals are going to teach you some words in a foreign language. They will give you some information, and then you can choose which bag open up. To give you experience with the procedure, they will start with some objects you are already familiar with. Later, they will name new kinds of toys and you have to find out which toys they want.</p>"+
+        "<tr align='center' height='300px'><td></td><td><img src='images/hill.png' style='position:absolute; TOP:400px; LEFT:450px; WIDTH:100px; z-index: 1'>"+
+        "<img src='images/Bear_straight.png'style='position:absolute; TOP:300px; LEFT:445px; WIDTH:200px'>"+
+        "</td><td></td><tr align='center' height='50px'><td><img src='images/bag3.jpg' style='position:absolute; TOP:380px; LEFT:385px; WIDTH:60px; z-index:1'>"+
+        "<img src='images/table.png' style='position:absolute; TOP:400px; LEFT:330px; WIDTH:160px'></td><td>"+
+        "</td><td><img src='images/bag3.jpg' style='position:absolute; TOP:380px; LEFT:650px; WIDTH:60px; z-index:1'>"+
+        "<img src='images/table.png' style='position:absolute; TOP:400px; LEFT:595px; WIDTH:160px'>"+
+        "</td></tr></tbody></table></div></div>"],
         show_clickable_nav: true,
         show_page_number: true,
         post_trial_gap: 2000
