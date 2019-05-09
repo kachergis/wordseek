@@ -1,15 +1,20 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>My experiment</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Word-seek v1</title>
         <script src="js/jspsych.js"></script>
         <script src="js/jspsych-html-button-response.js"></script>
         <!-- <script src="js/jspsych-animation.js"></script> -->
         <script src="js/jspsych-audio-button-response.js"></script>
         <script src="js/jspsych-instructions.js"></script>
-        <!--  will build complex-animation plugin that plays audio and shows whole scene -->
-        <script src="js/jspsych-animation.js"></script>
+        <!-- complex-animation embeds an animated sequence of images in a scene and plays audio -->
+        <script src="js/jspsych-complex-animation.js"></script>
+        <script src="js/mmturkey-0.6.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
         <link href="css/jspsych.css" rel="stylesheet" type="text/css"></link>
+        <link href="css/style.css" rel="stylesheet" type="text/css"></link>
+        <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     </head>
     <body></body>
     <script>
@@ -19,28 +24,23 @@
 
      var instructions = {
         type: 'instructions',
-        pages: ["<div style='width:500px; text-align:left' id='instructions'>"+
-                "<div style='width: 500px; margin: 0 auto; text-align: center; background-color: #8C1516; padding: 20px 15px 10px 10px'>"+
-                "<img src='images/stanford.png' height='46' width='360' alt='Stanford University'>"+
-                "</div>"+
-                "<div style='width: 500px;text-align: center'>"+
-                "<p> <strong>Stanford Language and Cognition Lab</strong></p></div>"+
-                "<p>In this experiment, you will learn words for new toys. Your task is to"+
-                "figure out which word goes with which toy. The materials were"+
-                "designed for children. Even if they seem strange at times, we ask you"+
-                "to try to be as accurate as possible. You will hear sound, so please"+
+        pages: ["<div style='width: 500px; margin: 0 auto; text-align: center; background-color: #8C1516; padding: 20px 15px 10px 10px'>"+
+                "<img src='images/stanford.png' height='46' width='360' alt='Stanford University'></div>"+
+                "<center><p><strong>Stanford Language and Cognition Lab</strong></p></center>"+
+                "<p>In this experiment, you will learn words for new toys. Your task is to "+
+                "figure out which word goes with which toy. The materials were "+
+                "designed for children. Even if they seem strange at times, we ask you "+
+                "to try to be as accurate as possible. You will hear sound, so please "+
                 "make sure your volume is turned on. The experiment takes about 7-9 minutes."+
-                "<p class='block-text' id='legal'>Legal information: By answering the following questions, you are participating in a study being performed by cognitive scientists in the Stanford Department of Psychology. If you have questions about this research, please contact George Kachergis at <a href='mailto://gkacherg@stanford.edu'>gkacherg@stanford.edu</a>. You must be at least 18 years old to participate. Your participation in this research is voluntary. You may decline to answer any or all of the following questions. You may decline further participation, at any time, without adverse consequences. Your anonymity is assured; the researchers who have requested your participation will not receive any personal information about you.</p>"+
-            	  "</div>",
-        "<div><div align='center' width='500px'> <p><strong>Instructions</strong></p><table style='width:100%'>"+
-        "<tbody><p>These animals are going to teach you some words in a foreign language. They will give you some information, and then you can choose which bag open up. To give you experience with the procedure, they will start with some objects you are already familiar with. Later, they will name new kinds of toys and you have to find out which toys they want.</p>"+
-        "<tr align='center' height='300px'><td></td><td><img src='images/hill.png' style='position:absolute; TOP:400px; LEFT:450px; WIDTH:100px; z-index: 1'>"+
-        "<img src='images/Bear_straight.png'style='position:absolute; TOP:300px; LEFT:445px; WIDTH:200px'>"+
-        "</td><td></td><tr align='center' height='50px'><td><img src='images/bag3.jpg' style='position:absolute; TOP:380px; LEFT:385px; WIDTH:60px; z-index:1'>"+
-        "<img src='images/table.png' style='position:absolute; TOP:400px; LEFT:330px; WIDTH:160px'></td><td>"+
-        "</td><td><img src='images/bag3.jpg' style='position:absolute; TOP:380px; LEFT:650px; WIDTH:60px; z-index:1'>"+
-        "<img src='images/table.png' style='position:absolute; TOP:400px; LEFT:595px; WIDTH:160px'>"+
-        "</td></tr></tbody></table></div></div>"],
+                "<p class='block-text' id='legal'>Legal information: By answering the following questions, you are participating in a study being performed by cognitive scientists in the Stanford Department of Psychology. If you have questions about this research, please contact George Kachergis at <a href='mailto://gkacherg@stanford.edu'>gkacherg@stanford.edu</a>. You must be at least 18 years old to participate. Your participation in this research is voluntary. You may decline to answer any or all of the following questions. You may decline further participation, at any time, without adverse consequences. Your anonymity is assured; the researchers who have requested your participation will not receive any personal information about you.</p>",
+        "<div class='w3-container'><p><strong>Instructions</strong></p>" +
+        "<p>These animals have some strange objects in bags. They will give you some information, and then you can choose which bag open up.</p></div>" +
+        "<div class='w3-third'> <img src='images/bag3.jpg' style='WIDTH:60px; z-index:1'>" +
+        "<img src='images/table.png' style='position:relative; top:-30px; WIDTH:160px'> </div>" +
+        "<div class='w3-third'> <img src='images/Bear_straight.png' style='WIDTH:200px'>" +
+        "<img src='images/hill.png'style='position:relative; top:-30px; WIDTH:100px; z-index:-1'></div>" +
+        "<div class='w3-third'> <img src='images/bag3.jpg' style='align:center; WIDTH:60px; z-index:1'>" +
+        "<img src='images/table.png' style='align:center; position:relative; top:-30px; WIDTH:160px'></div>"],
         show_clickable_nav: true,
         show_page_number: true,
         post_trial_gap: 2000
@@ -56,29 +56,38 @@
      }
 
      var animation_sequence = ["images/Bear_straight.png", "images/Bear_point_l.png", "images/Bear_point_r.png", "images/Bear_straight.png", "images/Bear_disappear.png"];
-
+/*
     var bear_trial = {
         type: 'animation',
         stimuli: animation_sequence,
         sequence_reps: 1,
-        frame_time: 2000, // choices: ['Q','P']
+        frame_time: 2000,
         prompt: '<img src="images/table.png"> <img src="images/bag3.jpg">'
+    }; */
+
+    var bear_trial_ch = {
+        type: 'complex-animation',
+        stimuli: animation_sequence,
+        scene_html: '<img src="images/table.png"> <img src="images/bag3.jpg">',
+        sequence_reps: 1,
+        frame_time: 2000, 
+        choices: ['Left','Right'],
+        prompt: 'Which bag do you want to open?'
     };
 
      var finish_slide = {
        type: 'html-button-response',
        stimulus: "<div class='slide' id='finished'>" +
-               "<p>You're finished - thanks for participating</p>" +
-              "<p>" +
-              "In this experiment we wanted to find out how people integrate different" +
-              "types of information they have about a speaker.</p>" +
+               "<p>You're finished - thank you for participating</p>" +
+              "<p>In this experiment we wanted to find out what cues " +
+              "inspire people's curiosity about novel objects.</p>" +
               "<p>Submitting to Mechanical Turk...</p>	</div>",
        choices : ["OK"]
      }
 
      // myTimeline.push(consent);
      myTimeline.push(instructions);
-     myTimeline.push(bear_trial, test_trial);
+     myTimeline.push(bear_trial_ch); // test_trial
      myTimeline.push(finish_slide)
 
     jsPsych.init({

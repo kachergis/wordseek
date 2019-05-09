@@ -1,0 +1,101 @@
+
+.agent {
+    position: absolute;
+    bottom: 255px;
+    left: 380px;
+    width: 280px;
+}
+
+.point_agent_r {
+    position: absolute;
+    bottom: 255px;
+    left: 368px;
+    width: 280px;
+}
+
+
+.point_agent_l {
+    position: absolute;
+    bottom: 255px;
+    left: 392px;
+    width: 280px;
+}
+
+.agent_eat {
+    margin-left: auto;
+    margin-right: auto;
+    width: 500px;
+}
+
+.hill {
+    position: absolute;
+    bottom: 70px;
+    left: 380px;
+    width: 280px;
+    z-index: 1
+}
+
+
+.fruit_r {
+    position: absolute;
+    bottom: 165px;  
+    left: 670px;
+    width: 250px;
+    z-index: 1
+}
+
+
+.fruit_l {
+    position: absolute;
+    bottom: 165px;
+    left: 120px;
+    width: 250px;
+    z-index: 1
+}
+
+
+
+.table_r {
+    position: absolute;
+    bottom: 0px;
+    left: 590px;
+    width: 400px;
+    z-index: 0
+}
+
+.table_l {
+    position: absolute;
+    bottom: 0px;
+    left: 30px;
+    width: 400px;
+    z-index: 0
+}
+
+
+#logo-text {
+  font-weight: bold;
+}
+
+
+.block-text {
+  width: 500px;
+  text-align: justify;
+  margin: 0 auto;
+  margin-bottom: 1em;
+}
+
+
+#legal {
+  margin: 0 auto;
+  margin-top: 1.5em;
+  font-size: 0.8em;
+}
+
+#number {
+  font-size: 42px;
+  font-family: Arial, sans-serif;
+  margin: 0 auto;
+  text-align: center;
+  width: 100px;
+  margin-top: 100px;
+}

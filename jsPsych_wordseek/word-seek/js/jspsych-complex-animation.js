@@ -5,7 +5,7 @@
  * documentation: docs.jspsych.org
  */
 
-jsPsych.plugins.animation = (function() {
+jsPsych.plugins["complex-animation"] = (function() {
 
   var plugin = {};
 
@@ -21,6 +21,13 @@ jsPsych.plugins.animation = (function() {
         default: undefined,
         array: true,
         description: 'The images to be displayed.'
+      },
+      scene_html: {
+        type: jsPsych.plugins.parameterType.STRING,
+        pretty_name: 'Scene HTML',
+        default: undefined,
+        array: true,
+        description: 'HTML in which the animated stimulus sequence is embedded.'
       },
       frame_time: {
         type: jsPsych.plugins.parameterType.INT,
@@ -68,7 +75,7 @@ jsPsych.plugins.animation = (function() {
 
     var animate_interval = setInterval(function() {
       var showImage = true;
-      display_element.innerHTML = ''; // clear everything
+      display_element.innerHTML = trial.scene_html; //''; // clear everything
       animate_frame++;
       if (animate_frame == trial.stimuli.length) {
         animate_frame = 0;
