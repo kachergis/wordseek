@@ -20,6 +20,9 @@
 
      var myTimeline = [];
 
+     // images to preload
+     var images = ['images/bag3.jpg', 'images/table.png', 'images/Bear_straight.png', "images/Bear_point_l.png", "images/Bear_point_r.png", 'images/Bear_disappear.png'];
+
      var instructions = {
         type: 'instructions',
         pages: ["<div style='width: 500px; margin: 0 auto; text-align: center; background-color: #8C1516; padding: 20px 15px 10px 10px'>"+
@@ -58,6 +61,13 @@
             a[j] = x;
         }
         return a;
+    }
+
+    function saveData(name, data){
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'write_data.php'); // 'write_data.php' is the path to the php file described above.
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(JSON.stringify({filename: name, filedata: data}));
     }
 
     var labels = ["bosa", "manu", "stigson"];
@@ -113,7 +123,7 @@
                 label_first: label_first
             }
         };
-        
+
         myTimeline.push(trial); // test_trial
     }
 
@@ -126,11 +136,16 @@
               "<p>Submitting to Mechanical Turk...</p>  </div>",
        choices : ["OK"]
     }
-    
+
     myTimeline.push(finish_slide);
-    
+
     jsPsych.init({
-        timeline: myTimeline
+        timeline: myTimeline,
+        preload_images: images, // preload_audio: audio,
+        on_finish: function(){
+        saveData("wordseek-data-" + subject_id, jsPsych.data.get().csv());
+        jsPsych.data.displayData();
+      }
     })
 
     </script>
