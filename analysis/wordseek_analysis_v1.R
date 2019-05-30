@@ -93,7 +93,7 @@ bmRemove <- brm(formula = FirstRemoveLabeled ~ Age * Condition + (1 | Subject),
 summary(bmRemove)
 
 
-plot(marginal_effects(bmLook), points = TRUE, rug = TRUE)
+plot(marginal_effects(bmRemove), points = TRUE, rug = TRUE)
 
 # should we set anything other than default prior?
 # prior = c(set_prior("normal(0,5)", class = "b"), 

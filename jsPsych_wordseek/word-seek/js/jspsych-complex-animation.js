@@ -20,14 +20,14 @@ jsPsych.plugins["complex-animation"] = (function() {
         pretty_name: 'Stimuli',
         default: undefined,
         array: true,
-        description: 'The images to be displayed.'
+        description: 'The sequence of images to be displayed.'
       },
       scene_html: {
         type: jsPsych.plugins.parameterType.STRING,
         pretty_name: 'Scene HTML',
-        default: undefined,
+        default: '',
         array: true,
-        description: 'HTML in which the animated stimulus sequence is embedded.'
+        description: 'HTML in which the animated stimulus (class=agent) is embedded.'
       },
       frame_time: {
         type: jsPsych.plugins.parameterType.INT,
@@ -50,9 +50,9 @@ jsPsych.plugins["complex-animation"] = (function() {
       choices: {
         type: jsPsych.plugins.parameterType.KEYCODE,
         pretty_name: 'Choices',
-        default: jsPsych.ALL_KEYS,
+        default: undefined,
         array: true,
-        description: 'Keys subject uses to respond to stimuli.'
+        description: 'Class of images that should be clickable as responses.'
       },
       prompt: {
         type: jsPsych.plugins.parameterType.STRING,
@@ -78,10 +78,24 @@ jsPsych.plugins["complex-animation"] = (function() {
       display_element.innerHTML = trial.scene_html; //''; // clear everything
       animate_frame++;
       if (animate_frame == trial.stimuli.length) {
+        $('.bag').on({
+           'click': function(){
+               // get id of bag clicked on, and store data
+               var id = $(this).attr('id');
+               console.log("Clicked bag " + id);
+               // (wait 500ms?) and bye-bye agent
+               $('.agent').attr('src','images/Bear_disappear.png');
+               setTimeout(function(){ 
+                  after_response(id);
+                  endTrial(); 
+               }, 1000);
+            }
+        });
+
         animate_frame = 0;
         reps++;
         if (reps >= trial.sequence_reps) {
-          endTrial();
+          //endTrial();
           clearInterval(animate_interval);
           showImage = false;
         }
@@ -91,9 +105,13 @@ jsPsych.plugins["complex-animation"] = (function() {
       }
     }, interval_time);
 
+
     function show_next_frame() {
       // show image
-      display_element.innerHTML = '<img src="'+trial.stimuli[animate_frame]+'" id="jspsych-animation-image"></img>';
+      //display_element.innerHTML = '<img src="'+trial.stimuli[animate_frame]+'" id="jspsych-animation-image"></img>';
+
+      // replace agent with next image
+      $('.agent').attr('src',trial.stimuli[animate_frame]);
 
       current_stim = trial.stimuli[animate_frame];
 
@@ -104,7 +122,7 @@ jsPsych.plugins["complex-animation"] = (function() {
       });
 
       if (trial.prompt !== null) {
-        display_element.innerHTML += trial.prompt;
+        display_element.innerHTML += trial.prompt[animate_frame];
       }
 
       if (trial.frame_isi > 0) {
@@ -120,33 +138,13 @@ jsPsych.plugins["complex-animation"] = (function() {
       }
     }
 
-    var after_response = function(info) {
-
+    var after_response = function(bag) {
       responses.push({
-        key_press: info.key,
-        rt: info.rt,
-        stimulus: current_stim
+        bag_clicked: bag
       });
-
-      // after a valid response, the stimulus will have the CSS class 'responded'
-      // which can be used to provide visual feedback that a response was recorded
-      display_element.querySelector('#jspsych-animation-image').className += ' responded';
     }
 
-    // hold the jspsych response listener object in memory
-    // so that we can turn off the response collection when
-    // the trial ends
-    var response_listener = jsPsych.pluginAPI.getKeyboardResponse({
-      callback_function: after_response,
-      valid_responses: trial.choices,
-      rt_method: 'date',
-      persist: true,
-      allow_held_key: false
-    });
-
     function endTrial() {
-
-      jsPsych.pluginAPI.cancelKeyboardResponse(response_listener);
 
       var trial_data = {
         "animation_sequence": JSON.stringify(animation_sequence),
