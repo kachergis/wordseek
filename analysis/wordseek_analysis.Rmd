@@ -1,0 +1,305 @@
+---
+title: "Wordseek"
+date: "`r Sys.Date()`"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+# Data preprocessing
+
+Preliminaries.
+
+```{r echo=FALSE}
+rm(list=ls())
+knitr::opts_chunk$set(fig.width=8, fig.height=5, 
+                      echo=TRUE, warning=FALSE, message=FALSE, cache=TRUE)
+library(tidyverse)
+library(lme4)
+library(knitr)
+library(markdown)
+library(lmerTest)
+library(stringr)
+library(langcog)
+library(xtable)
+library(Hmisc)
+require(ggplot2)
+require(rstan)
+require(lme4)
+require(brms)
+require(langcog)
+require(tidybayes)
+theme_set(theme_bw())
+```
+
+```{r}
+# delete file 041019_1 and 041719_1 from wordseek_csv, because they are empty and will cause errors
+bdat = read.csv("wordseek_counterbalance_sheet-5-22-19.csv", header=T)
+bdat$Subject = as.character(bdat$Subject)
+bdat$SID = as.character(bdat$SID)
+bdat$FirstChoice = as.character(bdat$FirstChoice)
+
+# a function extracting numbers
+numextract <- function(string) {str_extract(string, "\\-*\\d+\\.*\\d*")}
+
+# a function loading data
+load_behavioral_coding <- function(dir_name) {
+  start_col = c(
+    "LeftToyTouch_1.onset", "LeftToyTouch_2.onset",
+    "LeftToyTouch_3.onset", "RightToyTouch_1.onset",
+    "RightToyTouch_2.onset", "RightToyTouch_3.onset")
+  end_col = c(
+    "LeftToyTouch_1.offset", "LeftToyTouch_2.offset",
+    "LeftToyTouch_3.offset", "RightToyTouch_1.offset",
+    "RightToyTouch_2.offset", "RightToyTouch_3.offset")
+  bid_col = c(
+    "LeftToyBid_1.code01", "LeftToyBid_2.code01",
+    "LeftToyBid_3.code01", "RightToyBid_1.code01",
+    "RightToyBid_2.code01", "RightToyBid_3.code01")
+
+    all_dat = data.frame()
+    files = list.files(dir_name)
+    for (f in files) {
+        subj_dat = read.csv(paste(dir_name, f, sep = "/"))
+        
+        # Touch data
+        start_dat <- subj_dat %>% select(start_col) %>% gather(trial, start) %>% na.omit()
+        end_dat <- subj_dat %>% select(end_col) %>% gather(trial, end) %>% na.omit()
+        # SID, side, trial_num columns
+        touch_dat <-
+          start_dat %>% mutate(
+            sid = rep(str_replace(f, ".csv", ""), nrow(start_dat)),
+            side = tolower(gsub("Toy.*", "", trial)),
+            trial_num = as.numeric(numextract(trial)),
+            behavior = rep("touch", nrow(start_dat))
+          ) %>% select(sid, trial_num, side, behavior, start)
+        # combine columns
+        if (nrow(touch_dat) == nrow(end_dat)) {
+          touch_dat = cbind(touch_dat, end = (end_dat$end))
+        } else {
+          # what if it's not?
+          print(paste(
+            "touch_dat rows:",
+            nrow(touch_dat),
+            "end_dat rows:",
+            nrow(end_dat)
+          ))
+        }
+        
+        # Bid data
+        #subj_dat$trial = as.character(subj_dat$trial)
+        #subj_dat$type = as.character(subj_dat$type)
+        bid_dat <- subj_dat %>% select(bid_col) %>% gather(trial, type, na.rm=TRUE) # some missing values, some <NA>..
+        # attributes are not identical across measure variables
+        bid_dat[bid_dat == ""] <- NA
+        bid_dat <- bid_dat %>% na.omit()
+        bid_dat <-
+          bid_dat %>% mutate(
+            sid = rep(str_replace(f, ".csv", ""), nrow(bid_dat)),
+            side = tolower(gsub("Toy.*", "", trial)),
+            trial_num = as.numeric(numextract(trial)),
+            behavior = type,
+            start = rep(NA, nrow(bid_dat)),
+            end = rep(NA, nrow(bid_dat))
+          ) %>% select(sid, trial_num, side, behavior, start, end)
+        
+        
+        # combine touch and bid data rows
+        all_dat = rbind(all_dat, touch_dat, bid_dat)
+        
+    
+}
+return(all_dat)
+}
+
+```
+
+Load behavioral coding data. 
+
+```{r, echo=F, include=F}
+bed = load_behavioral_coding("wordseek_csv")
+
+```
+
+
+```{r}
+
+# exclude subjects
+badSs = unique(subset(bdat, Exclude!="N")$SID) # 43
+bdat = subset(bdat, Exclude=="N")
+goodSs = unique(bdat$SID)
+
+```
+
+
+```{r}
+
+#bb <- bed %>% mutate(duration = end - start) %>%
+#  group_by(sid, trial_num, side) %>%
+  
+bed$duration = with(bed, end - start)
+
+# fill in bids (q=question, l=look) and play durations
+bdat$LeftToyQ = NA
+bdat$RightToyQ = NA
+bdat$LeftToyLook = NA
+bdat$RightToyLook = NA
+for(s in unique(bdat$SID)) {
+  for(t in 1:3) {
+    behs = subset(bed, sid==s & trial_num==t)
+    ind = which(bdat$SID==s & bdat$Trial==t)
+    bdat[ind,]$LeftToyTotalTime = sum(subset(behs, behavior=="touch" & side=="left")$duration)
+    bdat[ind,]$RightToyTotalTime = sum(subset(behs, behavior=="touch" & side=="right")$duration)
+    bdat[ind,]$LeftToyQ = nrow(subset(behs, behavior=="q" & side=="left"))
+    bdat[ind,]$RightToyQ = nrow(subset(behs, behavior=="q" & side=="right"))
+    bdat[ind,]$LeftToyLook = nrow(subset(behs, behavior=="l" & side=="left"))
+    bdat[ind,]$RightToyLook = nrow(subset(behs, behavior=="l" & side=="right"))
+  }
+}
+
+bdat$LeftToyBids = with(bdat, LeftToyLook + LeftToyQ)
+bdat$RightToyBids = with(bdat, RightToyLook + RightToyQ)
+
+# FirstBag = first one talked about (left/right)
+# FirstBagLook = first one child looked into (left right)
+bdat$FirstBagLook = as.character(bdat$FirstBagLook)
+bdat$FirstBag = as.character(bdat$FirstBag)
+table(bdat$FirstBag, bdat$FirstBagLook)
+binom.test(table(bdat$FirstBagLook)) # sig. right bias..
+
+
+bdat$ChoseLabeled = ifelse(bdat$FirstChoice=="label", 1, 0)
+
+# need to code FirstToyRemove (left, right, together, null) in terms of FirstBag and FirstUtterance
+bdat$LabeledLeftToy = with(bdat, ifelse((FirstBag=="left" & FirstUtterance=="label") | (FirstBag=="right" & SecondUtterance=="label"), 1, 0))
+bdat$LabeledRightToy = with(bdat, ifelse((FirstBag=="right" & FirstUtterance=="label") | (FirstBag=="left" & SecondUtterance=="label"), 1, 0))
+bdat$FirstRemoveLabeled = with(bdat, ifelse((LabeledLeftToy==1 & FirstToyRemove=="left") | (LabeledRightToy==1 & FirstToyRemove=="right"), 1, 0))
+
+
+table(bdat$LabeledLeftToy, bdat$LabeledRightToy)
+# is this right?
+#     0  1
+#  0  0 89
+#  1 78  1
+bdat$LabeledToyBids = with(bdat, ifelse(LabeledLeftToy, LeftToyBids, RightToyBids))
+bdat$UnlabeledToyBids = with(bdat, ifelse(LabeledLeftToy, RightToyBids, LeftToyBids))
+
+bdat$LabeledToyTime = with(bdat, ifelse(LabeledLeftToy, LeftToyTotalTime, RightToyTotalTime))
+bdat$UnlabeledToyTime = with(bdat, ifelse(LabeledLeftToy, RightToyTotalTime, LeftToyTotalTime))
+
+# ratio of bids about labeled vs. unlabeled toy 
+bdat$LabeledBidsRatio = log( (bdat$LabeledToyBids / (bdat$UnlabeledToyBids+.01)) + 1e-5)
+summary(lmer(LabeledBidsRatio ~ Age + Condition + (1|Subject),  data=bdat))
+
+
+# ratio of time spent  labeled vs. unlabeled time playing 
+bdat$LabeledTimeRatio = log( (bdat$LabeledToyTime / (bdat$UnlabeledToyTime+10)) + 1e-5)
+summary(lmer(LabeledTimeRatio ~ Age + Condition + (1|Subject), data=bdat))
+
+
+# proportion looking first in bag with labeled object
+summary(glmer(ChoseLabeled ~ Age + Condition + (1|Subject), family=binomial, data=bdat))
+# Interrupted *
+
+table(bdat$ChoseLabeled, bdat$Condition) 
+# overall, only in the interrupted condition was there a difference: more looked in the labeled bag first
+
+summary(glmer(FirstRemoveLabeled ~ Age + Condition + (1|Subject), family=binomial, data=bdat))
+
+table(bdat$FirstRemoveLabeled, bdat$Condition)
+# in Huh, Interrupted, and Unknown conditions, more likely to first remove UNlabeled object
+
+
+summary(glmer(FirstRemoveLabeled ~ Age + Condition + (1|Subject), family=binomial, data=bdat))
+
+
+```
+
+
+```{r}
+# floor/round Age in years for graphing
+bdat$AgeYr = floor(bdat$Age) #round(bdat$Age)
+
+bdag = bdat %>% group_by(Condition, AgeYr) %>%
+  tidyboot_mean(ChoseLabeled)
+
+#multi_boot_standard(bdag, "ChoseLabeled") # not working on AgeYr group
+dodge = position_dodge(width = .1)
+ggplot(data=bdag, aes(x=AgeYr, y=mean, group=Condition, color=Condition)) +
+  geom_line(position=dodge) + geom_point(position=dodge) + ylab("Proportion First Looks at Labeled Object") + 
+  geom_linerange(aes(ymin = ci_lower, ymax = ci_upper), position = dodge) +
+  xlab("Age in Years (rounded)") + ylim(0,1) + ggthemes::theme_few() + geom_hline(yintercept=.5, lty="dashed")
+# langcog::scale_color_solarized()
+ggsave("prop_look_labeled_by_age.pdf", width=5, height=4)
+
+```
+
+
+```{r}
+bdag = bdat %>% group_by(Condition, AgeYr) %>%
+  tidyboot_mean(FirstRemoveLabeled)
+
+ggplot(data=bdag, aes(x=AgeYr, y=mean, group=Condition, color=Condition)) +
+  geom_linerange(aes(ymin = ci_lower, ymax = ci_upper), position = dodge) +
+  geom_line(position=dodge) + geom_point(position=dodge) + ylab("Proportion First Removed Labeled Object") + 
+  xlab("Age in Years (rounded)") + ylim(0,1) + ggthemes::theme_few() + geom_hline(yintercept=.5, lty="dashed")
+  ggsave("prop_remove_labeled_by_age.pdf", width=5, height=4)
+```
+
+
+```{r}
+bdag = bdat %>% group_by(Condition, AgeYr) %>%
+  tidyboot_mean(LabeledTimeRatio)
+
+ggplot(data=bdag, aes(x=AgeYr, y=mean, group=Condition, color=Condition)) +
+  geom_linerange(aes(ymin = ci_lower, ymax = ci_upper), position = dodge) +
+  geom_line(position=dodge) + geom_point(position=dodge) + ylab("log(Labeled:Unlabeled Toy Time)") + 
+  xlab("Age in Years (rounded)") +  ggthemes::theme_few() + geom_hline(yintercept=0, lty="dashed")
+  ggsave("playtime_by_age.pdf", width=5, height=4)
+```
+
+```{r}
+bdag = bdat %>% group_by(Condition, AgeYr) %>%
+  tidyboot_mean(LabeledBidsRatio)
+
+ggplot(data=bdag, aes(x=AgeYr, y=mean, group=Condition, color=Condition)) +
+  geom_linerange(aes(ymin = ci_lower, ymax = ci_upper), position = dodge) +
+  geom_line(position=dodge) + geom_point(position=dodge) + ylab("log(Labeled:Unlabeled Toy Bids)") + 
+  xlab("Age in Years (rounded)") + ggthemes::theme_few() + geom_hline(yintercept=0, lty="dashed")
+  ggsave("bids_by_age.pdf", width=5, height=4)
+```
+
+# try Bayesian regression
+rstan_options(auto_write = TRUE)
+options(mc.cores = parallel::detectCores())
+
+# with/without age interaction?
+bmLook <- brm(formula = ChoseLabeled ~ Age * Condition + (1 | Subject),
+            data = bdat, family = bernoulli(),
+            warmup = 1000, iter = 2000, chains = 4,
+            control = list(adapt_delta = 0.95))
+summary(bmLook)
+
+
+plot(marginal_effects(bmLook), points = TRUE, rug = TRUE)
+
+parameters <- bmLook %>% gather_draws(b_Age) %>% median_hdi()
+print(exp(parameters[c(".value",".lower",".upper")])) # exp() converts log-odds to odds
+
+parameters <- bmLook %>% gather_draws(b_ConditionInterrupted) %>% median_hdi()
+print(exp(parameters[c(".value",".lower",".upper")])) 
+
+parameters <- bmLook %>% gather_draws(b_ConditionUnknown) %>% median_hdi()
+print(exp(parameters[c(".value",".lower",".upper")])) 
+
+
+bmRemove <- brm(formula = FirstRemoveLabeled ~ Age * Condition + (1 | Subject),
+          data = bdat, family = bernoulli(),
+          warmup = 1000, iter = 2000, chains = 4,
+          control = list(adapt_delta = 0.95))
+summary(bmRemove)
+
+
+plot(marginal_effects(bmRemove), points = TRUE, rug = TRUE)
+```
