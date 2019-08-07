@@ -7,14 +7,6 @@
   z-index: 1;
 }
 
-.toy {
-  position:relative; 
-  top: 30px; 
-  left: -165px; 
-  width: 50px; 
-  z-index: -1;
-}
-
 
 .table {
   position: relative; 
@@ -26,13 +18,13 @@
 .agent {
   position:relative; 
   top: 10px; 
-  left: -25px; 
+  left: -20px; 
   width: 205px; 
   z-index: 1;
 }
 
 #stage {
-  width: 900px;
+  width: 800px;
   height: 440px;
   padding-bottom: 20px;
 }

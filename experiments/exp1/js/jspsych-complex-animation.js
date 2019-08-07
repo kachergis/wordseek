@@ -92,6 +92,8 @@ jsPsych.plugins["complex-animation"] = (function() {
                // get id of bag clicked on, and store data
                var id = $(this).attr('id');
                console.log("Clicked bag " + id);
+               //$(this).css('border', "solid 2px red"); 
+               $(this).hide(); 
                // (wait 500ms?) and bye-bye agent
                $('.agent').attr('src','images/Bear_disappear.png');
                setTimeout(function(){ 

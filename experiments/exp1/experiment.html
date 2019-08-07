@@ -33,11 +33,16 @@
      // images to preload
     var images = ['images/bag3.jpg', 'images/table.png', 'images/Bear_straight.png', "images/Bear_point_l.png", "images/Bear_point_r.png", 'images/Bear_disappear.png'];
 
+    // novel toys
+    for (var i = 0; i<18; i++) {
+        images.push('images/t'+i+'.png');
+    }
+
     var audio = ['sounds/Bear_hello.mp3'];
 
      var instructions = {
         type: 'instructions',
-        pages: ["<div style='width: 500px; margin: 0 auto; text-align: center; background-color: #8C1516; padding: 20px 15px 10px 10px'>"+
+        pages: ["<div class='w3-container' style='width: 600px; bottom-padding: 20px; text-align: left;'><div style='width: 600px; margin: 0 auto; text-align: center; background-color: #8C1516; padding: 20px 15px 10px 10px'>"+
                 "<img src='images/stanford.png' height='46' width='360' alt='Stanford University'></div>"+
                 "<center><p><strong>Stanford Language and Cognition Lab</strong></p></center>"+
                 "<p>In this experiment, you will learn words for new toys. Your task is to "+
@@ -45,9 +50,9 @@
                 "designed for children. Even if they seem strange at times, we ask you "+
                 "to try to be as accurate as possible. You will hear sound, so please "+
                 "make sure your volume is turned on. The experiment takes about 7-9 minutes."+
-                "<p class='block-text' id='legal'>Legal information: By answering the following questions, you are participating in a study being performed by cognitive scientists in the Stanford Department of Psychology. If you have questions about this research, please contact George Kachergis at <a href='mailto://gkacherg@stanford.edu'>gkacherg@stanford.edu</a>. You must be at least 18 years old to participate. Your participation in this research is voluntary. You may decline to answer any or all of the following questions. You may decline further participation, at any time, without adverse consequences. Your anonymity is assured; the researchers who have requested your participation will not receive any personal information about you.</p>",
+                "<p class='block-text' id='legal'>Legal information: By answering the following questions, you are participating in a study being performed by cognitive scientists in the Stanford Department of Psychology. If you have questions about this research, please contact George Kachergis at <a href='mailto://gkacherg@stanford.edu'>gkacherg@stanford.edu</a>. You must be at least 18 years old to participate. Your participation in this research is voluntary. You may decline to answer any or all of the following questions. You may decline further participation, at any time, without adverse consequences. Your anonymity is assured; the researchers who have requested your participation will not receive any personal information about you.</p></div><p />",
         "<div class='w3-container' id='stage'><p><strong>Instructions</strong></p>" +
-        "<p>These animals have some strange objects in bags. They will give you some information, and then you can choose which bag open up.</p>" +
+        "<p>This bear has toys in these bags. He will tell you something about the toys,<br /> and then you can click on a bag to open it up.</p>" +
         "<img src='images/bag3.jpg' class='bag' id='bag_l'> <img src='images/table.png' class='table' id='table_l'> " +
         "<img src='images/Bear_straight.png' class='agent'> " +
         //"<img src='images/hill.png' class='hill'></div>" +
@@ -122,9 +127,14 @@
         var trial = {
             type: 'complex-animation',
             stimuli: animation_sequence,
-            scene_html: "<div class='w3-container' id='stage'> <img src='images/bag3.jpg' class='bag' id='bag_l'> <img src='images/table.png' class='table' id='table_l'> " +
-            "<img src='images/Bear_straight.png' class='agent'> " + // <img src='images/hill.png' class='hill'>
-            "<img src='images/bag3.jpg' class='bag' id='bag_r'> <img src='images/table.png' class='table' id='table_r'> </div> ",
+            scene_html: "<div class='w3-container' id='stage'> <img src='images/bag3.jpg' class='bag' id='bag_l'>" +  
+                "<img src='images/table.png' class='table' id='table_l'> " +
+                "<img src='images/t"+i+".png' class='toy'>" +
+                "<img src='images/Bear_straight.png' class='agent'> " + // <img src='images/hill.png' class='hill'>
+                "<img src='images/bag3.jpg' class='bag' id='bag_r'>" + 
+                "<img src='images/table.png' class='table' id='table_r'>" +
+                "<img src='images/t"+(17-i)+".png' class='toy'>" +
+                "</div> ",
             sequence_reps: 1,
             frame_time: 2000, 
             choices: ['bag_l','bag_r'],

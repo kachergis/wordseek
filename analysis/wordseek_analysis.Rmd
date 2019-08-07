@@ -1,7 +1,9 @@
 ---
 title: "Wordseek"
+output:
+  html_document:
+    df_print: paged
 date: "`r Sys.Date()`"
-output: html_notebook
 ---
 
 This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
@@ -30,6 +32,7 @@ require(lme4)
 require(brms)
 require(langcog)
 require(tidybayes)
+require(tidyboot)
 theme_set(theme_bw())
 ```
 
@@ -178,10 +181,7 @@ bdat$FirstRemoveLabeled = with(bdat, ifelse((LabeledLeftToy==1 & FirstToyRemove=
 
 
 table(bdat$LabeledLeftToy, bdat$LabeledRightToy)
-# is this right?
-#     0  1
-#  0  0 89
-#  1 78  1
+
 bdat$LabeledToyBids = with(bdat, ifelse(LabeledLeftToy, LeftToyBids, RightToyBids))
 bdat$UnlabeledToyBids = with(bdat, ifelse(LabeledLeftToy, RightToyBids, LeftToyBids))
 
