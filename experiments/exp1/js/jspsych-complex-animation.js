@@ -10,6 +10,7 @@ jsPsych.plugins["complex-animation"] = (function() {
   var plugin = {};
 
   jsPsych.pluginAPI.registerPreload('complex-animation', 'stimuli', 'image');
+  jsPsych.pluginAPI.registerPreload('complex-animation', 'audio', 'audio');
 
   plugin.info = {
     name: 'complex-animation',
@@ -61,16 +62,14 @@ jsPsych.plugins["complex-animation"] = (function() {
         description: 'Any content here will be displayed below stimulus.'
       },
       audio: {
-        type: jsPsych.plugins.parameterType.STRING,
+        type: jsPsych.plugins.parameterType.AUDIO,
         pretty_name: 'Audio',
         default: null,
         description: 'Array of audio file names to be played as animation changes.'
       }
     }
   }
-
-  var hello = new Audio('sounds/Bear_hello.mp3');
-  hello.play();
+  
 
   plugin.trial = function(display_element, trial) {
 
@@ -81,6 +80,27 @@ jsPsych.plugins["complex-animation"] = (function() {
     var animation_sequence = [];
     var responses = [];
     var current_stim = "";
+
+    // setup audio
+    // var context = jsPsych.pluginAPI.audioContext();
+    // if(context !== null){
+    //   var source = context.createBufferSource();
+    //   source.buffer = jsPsych.pluginAPI.getAudioBuffer(trial.audio[0]); // loop over?
+    //   source.connect(context.destination);
+    // } else {
+    //   var audio = jsPsych.pluginAPI.getAudioBuffer(trial.audio[0]);
+    //   audio.currentTime = 0;
+    // }
+
+    // var audio = [];
+    // for (var i = 0; i < trial.audio.length - 1; i++) {
+    //   var tmp = new Audio(trial.audio[i]);
+    //   tmp.preload = "auto";
+    //   audio.append(tmp);
+    // }
+    var goodbye = new Audio('sounds/goodbye.mp3');
+    goodbye.preload = "auto";
+
 
     var animate_interval = setInterval(function() {
       var showImage = true;
@@ -93,13 +113,19 @@ jsPsych.plugins["complex-animation"] = (function() {
                var id = $(this).attr('id');
                console.log("Clicked bag " + id);
                //$(this).css('border', "solid 2px red"); 
-               $(this).hide(); 
-               // (wait 500ms?) and bye-bye agent
-               $('.agent').attr('src','images/Bear_disappear.png');
+               //$(this).hide(); 
+               $('.bag').off("click"); // no more clicking
+               $(this).css('opacity', "0.0");
                setTimeout(function(){ 
                   after_response(id);
-                  endTrial(); 
+                  goodbye.play();
+                  $('.agent').attr('src','images/Bear_disappear.png');
+                  $('.bag').css('opacity', "0.0"); // also disappear unclicked bag
                }, 1000);
+
+               setTimeout(function(){ 
+                  endTrial(); 
+               }, 2500);
             }
         });
 
@@ -120,11 +146,27 @@ jsPsych.plugins["complex-animation"] = (function() {
     function show_next_frame() {
       // show image
       //display_element.innerHTML = '<img src="'+trial.stimuli[animate_frame]+'" id="jspsych-animation-image"></img>';
-
       // replace agent with next image
       $('.agent').attr('src',trial.stimuli[animate_frame]);
 
       current_stim = trial.stimuli[animate_frame];
+
+      var context = jsPsych.pluginAPI.audioContext();
+      if(context !== null){
+        var source = context.createBufferSource();
+        source.buffer = jsPsych.pluginAPI.getAudioBuffer(trial.audio[animate_frame]); // loop over?
+        source.connect(context.destination);
+      } else {
+        var audio = jsPsych.pluginAPI.getAudioBuffer(trial.audio[animate_frame]);
+        audio.currentTime = 0;
+      }
+
+      if(context !== null){
+        startTime = context.currentTime;
+        source.start(startTime);
+      } else {
+        audio.play();
+      }
 
       // record when image was shown
       animation_sequence.push({
