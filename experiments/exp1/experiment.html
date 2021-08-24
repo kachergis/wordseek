@@ -76,7 +76,8 @@
 
 
      // images to preload
-    var images = ['images/bag3.jpg', 'images/table.png', 'images/Bear_straight.png', "images/Bear_point_l.png", "images/Bear_point_r.png", 'images/Bear_disappear.png'];
+    var images = ['images/bag3.jpg', 'images/classroom_background.png', 'images/Bear_straight.png', "images/Bear_point_l.png", "images/Bear_point_r.png", 'images/Bear_disappear.png', 'images/classroom_backgroundDistractor.png'];
+    // 'images/table.png',
 
     // novel toys
     for (var i = 0; i<18; i++) {
@@ -103,10 +104,12 @@
         "<div class='w3-container' id='stage'><p><strong>Instructions</strong></p>" +
         "<p>This bear has toys in these bags. He will tell you something about the toys,<br /> and then you can click on a bag to open it up.</p>" +
         "<p>Next we will test your audio: please make sure your sound is on.</p>" + 
-        "<img src='images/bag3.jpg' class='bag' id='bag_l'> <img src='images/table.png' class='table' id='table_l'> " +
-        "<img src='images/Bear_straight.png' class='agent'> " +
+        "<div class='background-instr'>" +
+        //"<img src='images/bag3.jpg' class='bag' id='bag_l'> <img src='images/table.png' class='table' id='table_l'> " +
+        "<img src='images/Bear_straight.png' class='agent-instr'> </div>" +
         //"<img src='images/hill.png' class='hill'></div>" +
-        " <img src='images/bag3.jpg' class='bag' id='bag_r'> <img src='images/table.png' class='table' id='table_r'> </div>"],
+        //" <img src='images/bag3.jpg' class='bag' id='bag_r'> <img src='images/table.png' class='table' id='table_r'> 
+        "</div>"],
         show_clickable_nav: true,
         show_page_number: true,
         post_trial_gap: 2000
@@ -204,12 +207,12 @@
         var trial = {
             type: 'complex-animation',
             stimuli: animation_sequence,
-            scene_html: "<div class='w3-container' id='stage'> <img src='images/bag3.jpg' class='bag' id='bag_l'>" +  
-                "<img src='images/table.png' class='table' id='table_l'> " +
+            scene_html: "<div class='w3-container' id='stage'> <div class='background'> <img src='images/bag3.jpg' class='bag' id='bag_l'>" +  
+               // "<img src='images/table.png' class='table' id='table_l'> " + 
                 "<img src='images/t"+i+".png' class='toy'>" +
                 "<img src='images/Bear_straight.png' class='agent'> " + // <img src='images/hill.png' class='hill'>
-                "<img src='images/bag3.jpg' class='bag' id='bag_r'>" + 
-                "<img src='images/table.png' class='table' id='table_r'>" +
+                "<img src='images/bag3.jpg' class='bag' id='bag_r'> </div>" + // load transparent image on top of Bear for non-interruption conditions? (and monkey image for interruption)
+              //  "<img src='images/table.png' class='table' id='table_r'>" +
                 "<img src='images/t"+(17-i)+".png' class='toy'>" +
                 "</div> ",
             sequence_reps: 1,
